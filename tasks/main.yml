@@ -1,0 +1,29 @@
+---
+- name: Copy user from roles to server
+  copy:
+    src: dashboard.admin-user.yml
+    dest: /tmp
+  tags:
+    - k8sdahsboard
+  when: "'master' in group_names"
+
+- name: Copy role from roles to server
+  copy:
+    src: dashboard.admin-user-role.yml
+    dest: /tmp
+  tags:
+    - k8sdahsboard
+  when: "'master' in group_names"
+
+- name: Install Kubernetes Dashboard version {{ k8sdashboard_release }} to cluster
+  command: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/{{ k8sdashboard_release }}/aio/deploy/recommended.yaml
+  tags:
+    - k8sdahsboard
+  when: "'master' in group_names"
+
+- name: Install Kubernetes Dashboard version role and user to cluster
+  command: kubectl create -f /tmp/dashboard.admin-user.yml -f /tmp/dashboard.admin-user-role.yml
+  tags:
+    - k8sdahsboard
+  when: "'master' in group_names"
+  ignore_errors: yes
